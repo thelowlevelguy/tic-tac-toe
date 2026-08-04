@@ -99,7 +99,8 @@ const gameController = (() => {
 		const horizontal = boardValues;
 		const vertical = verticalTranspose();
 		const diagonal = diagonalTranspose()
-		return alignWin(horizontal) || alignWin(vertical) || alignWin(verticalTranspose(diagonal))
+		const allLines = [...horizontal, ...vertical, ...diagonal]
+		return alignWin(allLines)
 	} 
 
 })()
