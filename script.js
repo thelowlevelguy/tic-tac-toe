@@ -23,6 +23,8 @@ const GameBoard  = (() => {
 	}
 	const getBoard = () => board;
 	//get back value on each cell
+	const getNumRow = () => rows;
+	const getNumCol = () => columns;
 
 	const boardValues = () => {
 		return board.map((row, index) => {
@@ -31,38 +33,33 @@ const GameBoard  = (() => {
 		})
 	}	
 	
-	return {getBoard, initBoard, boardValues};
+	return {getNumRow ,getNumCol ,getBoard, initBoard, boardValues};
 })()
 
 const Players = (() => {
 	const player1 = {
 		name : "X",
-		score: 0,
+		username: "",
 	}
 	const player2 = {
-		name : 'Y',
-		score: 0,
-	}
-	const incScore = (player) => {
-		player.score += 1;
+		name : 'O',
+		username: "",
 	}
 	return {player1, player2};
 })()
 
 const gameController = (() => {
+	const numOfCell = GameBoard.getNumRow() * GameBoard.getNumCol();
+	let filedCells = 0;
+	const playerX = Players.player1;
+	const playerO = Players.player2;
+	//goole says this one plays first usually
+	let turn = playerX.name;
 
-	//result 
-	//turn 
-	//players
-	//select player
-	//init the board
 	GameBoard.initBoard();
-	const boardValues = GameBoard.boardValues();
+	let commonBoard = GameBoard.getBoard();
+	let boardValues = GameBoard.boardValues();
 	//lauch a new game
-
-	//define turn 
-	//handle user input
-	//check if board can be filed
 
 	//check winner
 	const alignWin = (boardValues) => {
@@ -102,5 +99,27 @@ const gameController = (() => {
 		const allLines = [...horizontal, ...vertical, ...diagonal]
 		return alignWin(allLines)
 	} 
+
+	const insertionControl = () => {
+		if (!checkWinner()){
+			if(filedCells < numOfCell){
+				//check who's player get the turn
+				//const user clicked cell by row and column
+				if (playerX.name === turn){
+					//update board with user's piece
+					commonBoard[0][2] = playerX.name
+					//so now update the turn to playerO
+					turn = playerO.name;
+				
+				}else{
+					commonBoard[2][1] = playerO.name
+					turn = playerX.name;
+				}
+				//update the board view
+			}
+		}
+	} 
+	insertionControl()
+	console.log(commonBoard)
 
 })()
