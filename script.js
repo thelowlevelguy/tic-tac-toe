@@ -1,5 +1,5 @@
 const Cell = () => {
-	let value = 0;
+	let value = null;
 	const insertValue = (v) => {
 		value = v;
 	}
@@ -22,18 +22,8 @@ const GameBoard  = (() => {
 		}
 	}
 	const getBoard = () => board;
-	//get back value on each cell
-	const getNumRow = () => rows;
-	const getNumCol = () => columns;
 
-	const boardValues = () => {
-		return board.map((row, index) => {
-			const boardWithVals = row.map((cell, _) =>  cell.getValue())
-			return boardWithVals
-		})
-	}	
-	
-	return {getNumRow ,getNumCol ,getBoard, initBoard, boardValues};
+	return {getBoard, initBoard};
 })()
 
 const Players = (() => {
@@ -48,52 +38,91 @@ const Players = (() => {
 	return {player1, player2};
 })()
 
+const BoardDom = (() => {
+	const boardContainer = document.getElementById("boardContainer");
+	const renderBoard = (board) => {
+
+		boardContainer.textContent = "";
+		const boardDiv = document.createElement("div");
+		boardDiv.setAttribute("id", "board");
+
+		board.forEach((row, rowIndex) => {
+			const rowDiv = document.createElement("div");
+			rowDiv.setAttribute("class", "row")
+			row.forEach((column, colIndex) => {
+				const columnDiv = document.createElement("div");
+				columnDiv.setAttribute("class", "column")
+				columnDiv.setAttribute("data-id", `${rowIndex}-${colIndex}`)
+				columnDiv.textContent = column.getValue();
+				rowDiv.appendChild(columnDiv);
+			})
+			boardDiv.appendChild(rowDiv)
+		})
+		boardContainer.appendChild(boardDiv);
+	}
+
+	const markCell = (dataId, playerName) => {
+		boardContainer.querySelector(`[data-id="${dataId}"]`).textContent = playerName;
+	}
+
+	return {renderBoard, markCell}
+})()
+
 const gameController = (() => {
-	const numOfCell = GameBoard.getNumRow() * GameBoard.getNumCol();
-	let filedCells = 0;
 	const playerX = Players.player1;
 	const playerO = Players.player2;
 	//goole says this one plays first usually
 	let turn = playerX.name;
 
 	GameBoard.initBoard();
-	let commonBoard = GameBoard.getBoard();
-	let boardValues = GameBoard.boardValues();
-	//lauch a new game
+	let board = GameBoard.getBoard();
+	//get row's length from the first one
+	const lenRow = board[0].length;
 
 	//check winner
-	const alignWin = (boardValues) => {
-		return boardValues.map((row) => {
-			let previousValue = row[0];
-			let notWin = false;
-			row.map((value, index) => {
-				if (previousValue !== value){
-					notWin = true;
-					previousValue = value;
-				}
-			})
-			if (!notWin){
-				return previousValue;
-			}
-		//need only for value per column/row, for winner check
-		})[0]
-	}
-
-	const verticalTranspose = () =>  {
-		return boardValues[0].map((_, colIndex) => {
-			const columns = boardValues.map(row => row[colIndex])
-			return columns
+	const alignWin = (allLines) => {
+		return allLines.some(line => {
+			const first = line[0];
+			if (first == null) return false;
+			return line.every(value => value === first);
 		})
 	}
 
+	const horizontalTranspose = () => {
+		let horizontals = [];
+		for (let i = 0; i < lenRow; i++){
+			horizontals[i] = [];
+			for (let j = 0; j < lenRow; j++){
+				horizontals[i].push(board[i][j].getValue())
+			}
+		}
+		return horizontals
+	}
+
+	const verticalTranspose = () =>  {
+		const verticalRows = [];
+		for (let i = 0; i < lenRow; i++){
+			verticalRows[i] = [];
+			for (let j = 0; j < lenRow; j++){
+				verticalRows[i].push(board[j][i].getValue())
+			}
+		}
+		return verticalRows
+	}
+
 	const diagonalTranspose = () => {
-		const leftDiagonal = boardValues.map((row, rowIndex) => row[rowIndex]);
-		const rightDiagonal = boardValues.map((row, rowIndex) => row[row.length - 1 - rowIndex])
+		const leftDiagonal = [];
+		const rightDiagonal = [];
+
+		for (let i = 0; i < lenRow; i++){
+			leftDiagonal.push(board[i][i].getValue())
+			rightDiagonal.push(board[i][lenRow - 1 - i].getValue())
+		}
 		return [leftDiagonal, rightDiagonal]
 	}
 
 	const checkWinner = () => {
-		const horizontal = boardValues;
+		const horizontal = horizontalTranspose();
 		const vertical = verticalTranspose();
 		const diagonal = diagonalTranspose()
 		const allLines = [...horizontal, ...vertical, ...diagonal]
@@ -101,25 +130,37 @@ const gameController = (() => {
 	} 
 
 	const insertionControl = () => {
-		if (!checkWinner()){
-			if(filedCells < numOfCell){
-				//check who's player get the turn
-				//const user clicked cell by row and column
-				if (playerX.name === turn){
-					//update board with user's piece
-					commonBoard[0][2] = playerX.name
-					//so now update the turn to playerO
-					turn = playerO.name;
-				
-				}else{
-					commonBoard[2][1] = playerO.name
-					turn = playerX.name;
-				}
-				//update the board view
+		//check who's player get the turn
+		//const user clicked cell by row and column
+		let gameOver = false;
+		const controller = new AbortController();
+		boardContainer.addEventListener("click", (event)  => {
+			console.log(1)
+			if (gameOver){
+				return
 			}
-		}
-	} 
+
+			const dataId = event.target.getAttribute("data-id");
+			if (!dataId){
+				return
+			}
+			const [rowIndex, columnIndex] = dataId.split("-");
+			if (board[rowIndex][columnIndex].getValue() === null){
+				//update board with user's piece
+				board[rowIndex][columnIndex].insertValue(turn)
+				BoardDom.markCell(dataId, turn)
+				//so now update the turn to playerO
+				if (checkWinner()){
+					gameOver = true
+					controller.abort();
+					//display winner for 2 secs
+					return
+				}
+				turn = turn === playerO.name ? playerX.name : playerO.name;
+			}
+		}, {signal : controller.signal})		
+	}
+	BoardDom.renderBoard(board);
 	insertionControl()
-	console.log(commonBoard)
 
 })()
