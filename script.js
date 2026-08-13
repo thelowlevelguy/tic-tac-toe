@@ -65,7 +65,45 @@ const BoardDom = (() => {
 		boardContainer.querySelector(`[data-id="${dataId}"]`).textContent = playerName;
 	}
 
-	return {renderBoard, markCell}
+	const displayWinner = (winner) => {
+		const winnerBoard = document.createElement("dialog")
+		winnerBoard.id="winner-board"
+		const winnerText = document.createElement("div")
+		winnerText.setAttribute("id", "winner-text")
+		winnerText.textContent = `${winner} Win!`
+		winnerBoard.appendChild(winnerText)
+		winnerBoard.style.border = "none"
+		winnerBoard.style.width = "300px"
+		winnerBoard.style.heigth = "100px"
+		winnerBoard.style.display = "flex";
+		winnerBoard.style.justifyContent = "center"
+		winnerBoard.style.alignItems = "center"
+
+
+		const style = document.createElement('style');
+ 		style.textContent = `
+
+    		#winner-board::backdrop {
+     		background: rgba(0, 0, 0, 0.6);
+      		backdrop-filter: blur(3px);
+
+    	}`;
+
+    	document.head.appendChild(style)
+    	boardContainer.appendChild(winnerBoard)
+    	winnerBoard.showModal();
+
+		setTimeout(() => {
+			boardContainer.removeChild(winnerBoard)
+			document.head.removeChild(style)
+		}, 2000)
+	}
+
+	const resetBoard = () => {
+
+	}
+
+	return {renderBoard, markCell, displayWinner, renderBoard}
 })()
 
 const gameController = (() => {
@@ -135,7 +173,6 @@ const gameController = (() => {
 		let gameOver = false;
 		const controller = new AbortController();
 		boardContainer.addEventListener("click", (event)  => {
-			console.log(1)
 			if (gameOver){
 				return
 			}
@@ -154,6 +191,7 @@ const gameController = (() => {
 					gameOver = true
 					controller.abort();
 					//display winner for 2 secs
+					BoardDom.displayWinner(turn);
 					return
 				}
 				turn = turn === playerO.name ? playerX.name : playerO.name;
