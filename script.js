@@ -102,12 +102,6 @@ const BoardDom = (() => {
 		return [playerX, playerO]
 	}
 
-	const closeDialog = () => {
-		const dialog = document.getElementById("username-dialog")
-		dialog.close()
-		container.removeChild(dialog)
-	}
-
 	const renderBoard = (board) => {
 		boardContainer.textContent = "";
 		const boardDiv = document.createElement("div");
@@ -152,7 +146,7 @@ const BoardDom = (() => {
 		renderBoard(board);
 	}
 
-	return {renderFormDialog, setUsername, closeDialog, markCell, displayWinner, renderBoard}
+	return {renderFormDialog, setUsername, markCell, displayWinner, renderBoard}
 })()
 
 const gameController = (() => {
@@ -217,20 +211,8 @@ const gameController = (() => {
 		const allLines = [...horizontal, ...vertical, ...diagonal]
 		return alignWin(allLines)
 	} 
-	BoardDom.renderFormDialog();
-	BoardDom.renderBoard(board);
 
 	const insertionControl = () => {
-		const dialog = document.getElementById("username-dialog")
-		dialog.addEventListener("submit", (event) => {
-			event.preventDefault();
-			event.preventDefault();
-			players = BoardDom.setUsername()
-			playerX.name = players[0]
-			playerO.name = players[1]
-			BoardDom.closeDialog()
-		})
-		
 		//check who's player get the turn
 		//const user clicked cell by row and column
 		let gameOver = false;
@@ -263,6 +245,44 @@ const gameController = (() => {
 		}, {signal : controller.signal})		
 	}
 
-	insertionControl()
+	const setPlayerName = () => {
+		const dialog = document.getElementById("username-dialog")
+		dialog.addEventListener("submit", (event) => {
+			event.preventDefault();
+			players = BoardDom.setUsername()
+			playerX.name = players[0]
+			playerO.name = players[1]
+			dialog.close()
+			document.getElementById("container").removeChild(dialog)
+		})
+	} 
 
+	const initTurn = () =>  turn = playerX.mark;
+
+	const startGame = () => {
+		GameBoard.initBoard()	
+		BoardDom.renderFormDialog();
+		setPlayerName()
+		BoardDom.renderBoard(board)
+		initTurn()
+		insertionControl()
+	} 
+
+	const restartGame = () => {
+		GameBoard.initBoard()
+		initTurn()
+		BoardDom.renderBoard(board)
+		insertionControl()
+	}
+
+	startGame()
+
+	const startBtn = document.getElementById("start")
+	startBtn.addEventListener("click", () => {
+		startGame()
+	})
+	const restartBtn = document.getElementById("restart")
+	restartBtn.addEventListener("click", () => {
+		restartGame()
+	})
 })()
