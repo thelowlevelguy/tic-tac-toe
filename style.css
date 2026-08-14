@@ -1,6 +1,7 @@
 #container {
 	font-family: roboto, sans-serif;
 	display: flex;
+	flex-direction: column;
 	justify-content: center;
 	align-items: center;
 	height: 100vh;
@@ -13,6 +14,8 @@
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
+	border-radius: 10px;
+	color: #fff;
 }
 
 .row {
@@ -22,10 +25,83 @@
 .column {
 	height: 7rem;
     width: 7rem;
-    margin: 1px;
-	border: 1px solid #817E7E;
+	border: 2px solid #fff;
 	font-size: 4rem;
 	display: flex;
 	justify-content: center;
 	align-items: center;
+	border-radius: 20px;
+	background-color: #B58C70;
+
+}
+
+#title{
+	font-size: 1.5rem;
+	margin: 20px;
+	letter-spacing: 4px;
+}
+
+.player-board{
+	margin: 20px;
+}
+
+button{
+	border: none;
+	background-color: #fafaaf;
+	padding: 8px 20px;
+	font-size: 1.1rem;
+	margin: 10px;
+	margin-left: 0;
+	border-radius: 5px;
+	cursor: pointer;
+	font-weight: 700;
+	letter-spacing: 2px;
+}
+
+.players {
+	display: flex;
+	justify-content: space-between;
+	margin-top: 30px;
+	font-size: 1.2rem;
+	letter-spacing: 2px;
+}
+
+#winner-board {
+ 	border: none;
+ 	width: 300px;
+ 	height: 50px;
+ 	display: flex;
+ 	justify-content: center;
+ 	align-items: center;
+}
+
+#username-dialog {
+	border: none;
+ 	width: 400px;
+ 	height: 200px;
+ 	display: flex;
+ 	justify-content: center;
+ 	align-items: center;
+ 	border-radius: 10px;
+}
+
+form {
+	height: 100%;
+}
+
+input {
+	margin: 20px;
+	padding: 8px 20px;
+	border-radius: 5px;
+	outline: none;
+	border: 1px solid grey;
+}
+
+input:focus{
+	border: 1px solid blue;
+}
+
+dialog::backdrop {
+ 	background: rgba(0, 0, 0, 0.6);
+  	backdrop-filter: blur(3px);
 }
