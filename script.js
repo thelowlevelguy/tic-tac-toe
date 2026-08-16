@@ -57,9 +57,9 @@ const BoardDom = (() => {
 		const playerXInput = document.createElement("input")
 
 		playerXLabel.textContent = "Player X";
-		playerXInput.style.placeholder = "username"
+		playerXInput.placeholder = "username"
 
-		playerXLabel.for = "Player-X"
+		playerXLabel.htmlFor = "Player-X"
 		playerXInput.name = "Player-X"
 
 		playerXBlock.appendChild(playerXLabel)
@@ -71,9 +71,9 @@ const BoardDom = (() => {
 		const playerOInput = document.createElement("input")
 
 		playerOLabel.textContent = "Player O";
-		playerOInput.style.placeholder = "username"
+		playerOInput.placeholder = "username"
 
-		playerOLabel.for = "Player-O"
+		playerOLabel.htmlFor = "Player-O"
 		playerOInput.name = "Player-O"
 
 		playerOBlock.appendChild(playerOLabel)
@@ -126,12 +126,12 @@ const BoardDom = (() => {
 		boardContainer.querySelector(`[data-id="${dataId}"]`).textContent = playerName;
 	}
 
-	const displayWinner = (winner) => {
+	const displayWinner = (gameResult) => {
 		const winnerBoard = document.createElement("dialog")
 		winnerBoard.id="winner-board"
 		const winnerText = document.createElement("div")
 		winnerText.setAttribute("id", "winner-text")
-		winnerText.textContent = `${winner} Win!`
+		winnerText.textContent = gameResult;
 		winnerBoard.appendChild(winnerText)
 
     	boardContainer.appendChild(winnerBoard)
@@ -232,20 +232,29 @@ const gameController = (() => {
 				board[rowIndex][columnIndex].insertValue(turn)
 				BoardDom.markCell(dataId, turn)
 				//so now update the turn to playerO
+
 				if (checkWinner()){
 					gameOver = true
 					controller.abort();
 					//display winner for 2 secs
 					let winner = turn === playerO.mark ? playerO.name : playerX.name
-					BoardDom.displayWinner(winner);
+					BoardDom.displayWinner(`${winner} win!`);
 					return
 				}
 				turn = turn === playerO.mark ? playerX.mark : playerO.mark;
+			}
+			const isBoardFull = () => board.flat().every(cell => cell.getValue() !== null);
+			if (isBoardFull()){
+			    gameOver = true
+			    controller.abort();
+			    BoardDom.displayWinner("Draw"); // or a dedicated "draw" message
+			    return
 			}
 		}, {signal : controller.signal})		
 	}
 
 	const setPlayerName = () => {
+		const controller = new AbortController();
 		const dialog = document.getElementById("username-dialog")
 		dialog.addEventListener("submit", (event) => {
 			event.preventDefault();
@@ -253,8 +262,9 @@ const gameController = (() => {
 			playerX.name = players[0]
 			playerO.name = players[1]
 			dialog.close()
+			controller.abort()
 			document.getElementById("container").removeChild(dialog)
-		})
+		}, {signal : controller.signal})
 	} 
 
 	const initTurn = () =>  turn = playerX.mark;
