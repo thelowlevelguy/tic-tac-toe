@@ -146,7 +146,7 @@ const BoardDom = (() => {
 		renderBoard(board);
 	}
 
-	return {renderFormDialog, setUsername, markCell, displayWinner, renderBoard}
+	return {boardContainer, renderFormDialog, setUsername, markCell, displayWinner, renderBoard}
 })()
 
 const gameController = (() => {
@@ -217,7 +217,7 @@ const gameController = (() => {
 		//const user clicked cell by row and column
 		let gameOver = false;
 		const controller = new AbortController();
-		boardContainer.addEventListener("click", (event)  => {
+		BoardDom.boardContainer.addEventListener("click", (event)  => {
 			if (gameOver){
 				return
 			}
